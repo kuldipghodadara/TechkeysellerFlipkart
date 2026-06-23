@@ -1,0 +1,70 @@
+{
+  "name": "electron-app",
+  "version": "1.0.2",
+  "description": "Flipkart Seller Dashboard",
+  "main": "main.js",
+  "author": "TechKeySeller",
+  "license": "ISC",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder",
+    "build-win": "electron-builder --win",
+    "dist": "electron-builder --win --x64",
+    "publish": "electron-builder --win --x64 --publish always"
+  },
+  "build": {
+    "appId": "com.techkeyseller.flipkart",
+    "productName": "TechKeySellerFlipkart",
+    "directories": {
+      "output": "dist"
+    },
+    "publish": {
+      "provider": "github",
+      "owner": "kuldipghodadara",
+      "repo": "TechkeysellerFlipkart",
+      "releaseType": "release",
+      "private": true
+    },
+    "files": [
+      "**/*",
+      "!labels/**/*",
+      "!temp_labels/**/*",
+      "!node_modules/.cache/**/*",
+      "!*.log"
+    ],
+    "extraResources": [
+      {
+        "from": "renderer",
+        "to": "renderer"
+      }
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    }
+  },
+  "devDependencies": {
+    "electron": "^42.4.1",
+    "electron-builder": "^26.15.3"
+  },
+  "dependencies": {
+    "csv-writer": "^1.6.0",
+    "electron-log": "^5.4.4",
+    "electron-updater": "^6.8.9",
+    "keytar": "^7.9.0",
+    "pdf-lib": "^1.17.1",
+    "pdf-to-printer": "^5.8.0"
+  }
+}
