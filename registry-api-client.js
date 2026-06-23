@@ -614,6 +614,51 @@ class RegistryApiClient {
     return await this._makeRequest(url, JSON.stringify(payload), true);
   }
 
+  async fetchOTC() {
+    const op = this._getOp('sfs_getOTC');
+    if (!op) {
+      const fallbackQuery = 'query sfs_getOTC($locationId: String, $flow: String) {\n  sfs_getOTC(locationId: $locationId, flow: $flow) {\n    location_id\n    otc_details {\n      type\n      otc\n      flow\n      __typename\n    }\n    has_error\n    error_code\n    __typename\n  }\n}';
+      const variables = {
+        locationId: this.sellerConstants.locationId,
+        flow: 'FORWARD'
+      };
+      const payload = JSON.stringify({
+        operationName: 'sfs_getOTC',
+        variables,
+        query: fallbackQuery
+      });
+      try {
+        const data = await this._makeRequest('https://seller.flipkart.com/napi/graphql', payload);
+        return data?.data?.sfs_getOTC || null;
+      } catch (err) {
+        console.error('[RegistryClient] OTC fetch failed:', err.message);
+        return null;
+      }
+    }
+
+    const variables = {
+      locationId: this.sellerConstants.locationId,
+      flow: 'FORWARD'
+    };
+    const payload = JSON.stringify({
+      operationName: 'sfs_getOTC',
+      variables,
+      query: op.query
+    });
+
+    try {
+      const data = await this._makeRequest(op.url, payload);
+      return data?.data?.sfs_getOTC || null;
+    } catch (err) {
+      console.error('[RegistryClient] OTC fetch failed:', err.message);
+      return null;
+    }
+  }
+
+  getShipmentMeta(shipmentId) {
+    return this.ordersCache.get(shipmentId) || null;
+  }
+
   _emptyStats() {
     return { toAccept: 0, toPack: 0, toDispatch: 0, inTransit: 0, upcoming: 0, completed: 0 };
   }

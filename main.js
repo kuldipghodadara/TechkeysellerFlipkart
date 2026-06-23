@@ -360,6 +360,8 @@ ipcMain.handle('get-orders-page', wrapApi(async (e, { status, pageNum, pageSize 
   return registryClient.fetchOrders(status, pageNum, pageSize || 20);
 }));
 
+ipcMain.handle('get-otc', wrapApi(() => registryClient.fetchOTC()));
+
 // =============== Export ===============
 
 ipcMain.handle('export-orders', async () => {
@@ -431,8 +433,15 @@ ipcMain.handle('print-labels', async (e, { shipmentIds, reprint }) => {
       return { success: false, error: 'Download folder selection cancelled' };
     }
 
-    const savedFiles = [];
     const printService = require('./print-service');
+    const { PDFDocument } = require('pdf-lib');
+    const crypto = require('crypto');
+
+    const batchId = new Date().toISOString().replace(/T/, '_').replace(/[:.]/g, '-').substring(0, 19) + '_' + crypto.randomBytes(3).toString('hex').toUpperCase();
+    const batchDir = path.join(downloadFolder, batchId);
+    fs.mkdirSync(batchDir, { recursive: true });
+
+    const labelEntries = [];
 
     for (const shipmentId of shipmentIds) {
       const res = await registryClient.printLabels([shipmentId], reprint);
@@ -441,29 +450,80 @@ ipcMain.handle('print-labels', async (e, { shipmentIds, reprint }) => {
       if (Buffer.isBuffer(res)) {
         pdfBuffer = res;
       } else if (res && (res.url || res.pdfUrl)) {
-        const url = res.url || res.pdfUrl;
-        pdfBuffer = await registryClient.downloadFileBuffer(url);
+        pdfBuffer = await registryClient.downloadFileBuffer(res.url || res.pdfUrl);
       } else if (typeof res === 'string' && res.startsWith('%PDF')) {
         pdfBuffer = Buffer.from(res, 'binary');
       } else {
-        throw new Error(`Failed to generate label PDF for shipment ${shipmentId}`);
+        console.error(`[Main] Failed to generate label PDF for shipment ${shipmentId}`);
+        continue;
       }
 
-      const filePath = path.join(downloadFolder, `LABEL_${shipmentId}.pdf`);
-      fs.writeFileSync(filePath, pdfBuffer);
-      savedFiles.push(filePath);
+      const meta = registryClient.getShipmentMeta(shipmentId);
+      let sku = 'UNKNOWN';
+      let quantity = 1;
+      let sellerPrice = 0;
+      if (meta) {
+        const spec = meta.shipmentContents?.shipmentGroupSpecs?.[0];
+        if (spec?.listing?.product?.sku) sku = spec.listing.product.sku;
+        if (spec?.quantity) quantity = spec.quantity;
+        sellerPrice = meta.sellerPrice || 0;
+      }
+
+      labelEntries.push({ shipmentId, pdfBuffer, sku, quantity, sellerPrice });
     }
 
-    // Automatically open the selected download folder
+    if (labelEntries.length === 0) {
+      fs.rmdirSync(batchDir, { recursive: true });
+      return { success: false, error: 'No labels could be generated' };
+    }
+
+    const HIGHER_INVOICE_THRESHOLD = 2;
+    const higherInvoice = labelEntries.filter(e => e.quantity >= HIGHER_INVOICE_THRESHOLD);
+    const sortSku = labelEntries.filter(e => e.quantity < HIGHER_INVOICE_THRESHOLD);
+    sortSku.sort((a, b) => a.sku.localeCompare(b.sku));
+
+    const savedFiles = [];
+
+    async function mergePdfs(entries, filename) {
+      if (entries.length === 0) return;
+      const merged = await PDFDocument.create();
+      for (const entry of entries) {
+        try {
+          const src = await PDFDocument.load(entry.pdfBuffer);
+          const pages = await merged.copyPages(src, src.getPageIndices());
+          pages.forEach(p => merged.addPage(p));
+        } catch (err) {
+          console.error(`[Main] Failed to merge PDF for ${entry.shipmentId}:`, err.message);
+        }
+      }
+      if (merged.getPageCount() > 0) {
+        const bytes = await merged.save();
+        const filePath = path.join(batchDir, filename);
+        fs.writeFileSync(filePath, Buffer.from(bytes));
+        savedFiles.push(filePath);
+      }
+    }
+
+    if (higherInvoice.length > 0) {
+      await mergePdfs(higherInvoice, 'HigherInvoice.pdf');
+    }
+
+    const remaining = higherInvoice.length > 0 ? sortSku : labelEntries;
+    remaining.sort((a, b) => a.sku.localeCompare(b.sku));
+    await mergePdfs(remaining, 'SortSku.pdf');
+
     const { shell } = require('electron');
-    await shell.openPath(downloadFolder);
+    await shell.openPath(batchDir);
 
-    // Print all saved PDFs using existing print-service
     for (const filePath of savedFiles) {
-      await printService.print(filePath);
+      try {
+        await printService.print(filePath);
+      } catch (err) {
+        console.error(`[Main] Print failed for ${filePath}:`, err.message);
+      }
     }
 
-    return { success: true, count: savedFiles.length };
+    return { success: true, count: labelEntries.length, batchDir, files: savedFiles.map(f => path.basename(f)) };
   } catch (err) {
     if (err.message === 'SESSION_EXPIRED') {
       mainWindow.webContents.send('session-expired');

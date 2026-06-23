@@ -236,7 +236,7 @@ async function loadView(name) {
     case 'dashboard': loadStats(); break;
     case 'to-accept': loadTableProgressive('to-accept', 'pendingToAccept', ['order_id', 'sku', 'product_title', 'quantity', 'seller_price', 'dispatch_date']); break;
     case 'to-pack': loadToPackSKUs(); break;
-    case 'pending-dispatch': loadTableProgressive('pending-dispatch', 'pendingToDispatch', ['order_id', 'sku', 'quantity', 'dispatch_date', 'courier_partner']); break;
+    case 'pending-dispatch': loadPendingDispatch(); break;
     case 'in-transit': loadTableProgressive('in-transit', 'inTransit', ['order_id', 'sku', 'order_status', 'quantity', 'courier_partner']); break;
     case 'completed': loadTableProgressive('completed', 'completed', ['order_id', 'sku', 'order_status', 'quantity', 'dispatch_date']); break;
     case 'upcoming': loadTableProgressive('upcoming', 'upcoming', ['order_id', 'sku', 'product_title', 'quantity', 'seller_price', 'dispatch_after_date']); break;
@@ -332,6 +332,7 @@ function mapShipment(item, status) {
     shipping_id: item.shippingId,
     group_id: item.groupId || '',
     is_label_printed: item.isLabelPrinted || false,
+    tracking_number: item.tracking?.trackingId || '-',
     raw_item: item
   };
 }
@@ -582,7 +583,8 @@ document.getElementById('btn-bulk-print')?.addEventListener('click', async () =>
   try {
     const res = await API.printLabels(ids, false);
     if (res && res.success) {
-      toast(`Successfully printed ${res.count} labels!`);
+      const files = res.files ? res.files.join(', ') : '';
+      toast(`Printed ${res.count} labels! Files: ${files}`);
       await refreshAll();
     } else {
       toast(res?.error || 'Bulk print failed', true);
@@ -669,6 +671,44 @@ document.getElementById('btn-select-download-folder')?.addEventListener('click',
     if (input) input.value = folder;
     toast('Download folder updated successfully');
   }
+});
+
+// ========== Pending Dispatch with OTC ==========
+async function loadPendingDispatch() {
+  loadTableProgressive('pending-dispatch', 'pendingToDispatch', ['order_id', 'sku', 'quantity', 'dispatch_date', 'courier_partner', 'tracking_number']);
+
+  const otcBanner = document.getElementById('otc-banner');
+  const otcValue = document.getElementById('otc-value');
+  if (otcBanner) otcBanner.style.display = 'none';
+
+  try {
+    const otcData = await API.getOTC();
+    if (otcData && !otcData.has_error && otcData.otc_details && otcData.otc_details.length > 0) {
+      const otcTexts = otcData.otc_details.map(d => `${d.type}: ${d.otc}`).join(' | ');
+      if (otcValue) otcValue.innerText = otcTexts;
+      if (otcBanner) otcBanner.style.display = '';
+    } else if (otcData && otcData.has_error) {
+      if (otcValue) otcValue.innerText = otcData.error_code === 'OTC_UNAVAILABLE' ? 'No pickup scheduled yet' : (otcData.error_code || 'Unavailable');
+      if (otcBanner) otcBanner.style.display = '';
+    }
+  } catch (err) {
+    console.error('OTC fetch failed:', err);
+  }
+}
+
+// ========== Select All / Deselect All for To Pack ==========
+document.getElementById('btn-to-pack-select-all')?.addEventListener('click', () => {
+  document.querySelectorAll('.checkbox-to-pack-single').forEach(cb => { cb.checked = true; });
+  const selectAllCb = document.getElementById('checkbox-to-pack-select-all');
+  if (selectAllCb) selectAllCb.checked = true;
+  updateSelectionCount();
+});
+
+document.getElementById('btn-to-pack-deselect-all')?.addEventListener('click', () => {
+  document.querySelectorAll('.checkbox-to-pack-single').forEach(cb => { cb.checked = false; });
+  const selectAllCb = document.getElementById('checkbox-to-pack-select-all');
+  if (selectAllCb) selectAllCb.checked = false;
+  updateSelectionCount();
 });
 
 // ========== Init ==========

@@ -291,6 +291,8 @@
                             <span id="to-pack-selected-count"
                                 style="font-size: 13px; font-weight: 600; color: var(--text-secondary);">0
                                 selected</span>
+                            <button id="btn-to-pack-select-all" class="btn btn-sm btn-ghost" style="font-size:12px; padding:4px 10px;">Select All</button>
+                            <button id="btn-to-pack-deselect-all" class="btn btn-sm btn-ghost" style="font-size:12px; padding:4px 10px;">Deselect All</button>
                         </div>
                         <div style="display: flex; gap: 8px;">
                             <button id="btn-bulk-print" class="btn btn-outline" disabled>
@@ -346,6 +348,15 @@
                     <div id="loader-pending-dispatch" class="page-loader" style="display:none;">
                         <div class="spinner"></div>Loading pending dispatch...
                     </div>
+                    <div id="otc-banner" class="settings-card" style="margin-bottom: 16px; max-width: 100%; display: none;">
+                        <div style="display:flex; align-items:center; gap:12px;">
+                            <span style="font-size:18px;">📦</span>
+                            <div>
+                                <h3 style="margin:0;">Pickup OTC</h3>
+                                <p id="otc-value" class="meta-text" style="margin:4px 0 0;">-</p>
+                            </div>
+                        </div>
+                    </div>
                     <div class="table-shell">
                         <table class="data-table">
                             <thead>
@@ -355,11 +366,12 @@
                                     <th>Qty</th>
                                     <th>Dispatch By</th>
                                     <th>Courier</th>
+                                    <th>Tracking</th>
                                 </tr>
                             </thead>
                             <tbody id="tbody-pending-dispatch">
                                 <tr>
-                                    <td colspan="5" class="empty-state">No data</td>
+                                    <td colspan="6" class="empty-state">No data</td>
                                 </tr>
                             </tbody>
                         </table>

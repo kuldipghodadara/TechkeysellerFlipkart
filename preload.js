@@ -41,6 +41,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   rtdOrders: (shipmentIds) => ipcRenderer.invoke('rtd-orders', { shipmentIds }),
   getDownloadFolder: () => ipcRenderer.invoke('get-download-folder'),
   selectDownloadFolder: () => ipcRenderer.invoke('select-download-folder'),
+  getOTC: () => ipcRenderer.invoke('get-otc'),
 
   // Auto Updater
   checkForUpdates: () => ipcRenderer.invoke('check-for-updates'),
