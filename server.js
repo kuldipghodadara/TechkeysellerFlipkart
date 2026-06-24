@@ -15,24 +15,18 @@ require('./firebase-config');
 const authRoutes = require('./routes/auth');
 const adminRoutes = require('./routes/admin');
 const logsRoutes = require('./routes/logs');
+const profileRoutes = require('./routes/profile');
+const plansRoutes = require('./routes/plans');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/logs', logsRoutes);
+app.use('/api/profile', profileRoutes);
+app.use('/api/plans', plansRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', message: 'Backend service is running' });
-});
-
-// Legacy license endpoint (backward compatibility during transition)
-app.post('/api/license/verify', (req, res) => {
-  const { licenseKey } = req.body;
-  if (licenseKey === 'VALID-1234') {
-    res.json({ valid: true, expires: '2027-01-01' });
-  } else {
-    res.status(401).json({ valid: false, message: 'Invalid License Key' });
-  }
 });
 
 const PORT = process.env.PORT || 5000;

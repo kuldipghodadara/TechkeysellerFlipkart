@@ -1,188 +1,104 @@
 const express = require('express');
 const router = express.Router();
-const { db, auth, Timestamp } = require('../firebase-config');
+const bcrypt = require('bcryptjs');
+const { db, Timestamp } = require('../firebase-config');
+const { authenticateUser, requireLicense, getLicense, generateToken, deductCredit } = require('../middleware/auth');
 
-// Register new user
+// POST /api/auth/register
 router.post('/register', async (req, res) => {
   try {
-    const { name, email, mobile, password } = req.body;
+    const { mobile, sellerName, gstNumber, email, password, confirmPassword } = req.body;
+    if (!mobile || !sellerName || !email || !password || !confirmPassword) return res.status(400).json({ error: 'All fields required' });
+    if (password.length < 6) return res.status(400).json({ error: 'Password min 6 chars' });
+    if (password !== confirmPassword) return res.status(400).json({ error: 'Passwords do not match' });
 
-    if (!name || !email || !password) {
-      return res.status(400).json({ error: 'Name, email, and password are required' });
-    }
+    if (!(await db.collection('users').where('mobile', '==', mobile).get()).empty) return res.status(409).json({ error: 'Mobile already registered' });
+    if (!(await db.collection('users').where('email', '==', email.toLowerCase()).get()).empty) return res.status(409).json({ error: 'Email already registered' });
 
-    // Create Firebase Auth user
-    const userRecord = await auth.createUser({
-      email,
-      password,
-      displayName: name
-    });
-
-    // Create Firestore user document with 7-day trial
     const now = Timestamp.now();
-    const trialExpiry = new Date();
-    trialExpiry.setDate(trialExpiry.getDate() + 7);
-
-    await db.collection('users').doc(userRecord.uid).set({
-      uid: userRecord.uid,
-      name,
-      email,
-      mobile: mobile || null,
-      createdAt: now,
-      trialExpiresAt: Timestamp.fromDate(trialExpiry),
-      plan: 'trial',
-      planExpiresAt: null,
-      machineId: null,
-      lastLogin: now
+    const ref = db.collection('users').doc();
+    await ref.set({
+      mobile, sellerName, gstNumber: gstNumber || null, email: email.toLowerCase(),
+      passwordHash: await bcrypt.hash(password, 10),
+      accountStatus: 'ACTIVE', totalCredits: 50, usedCredits: 0,
+      createdAt: now, updatedAt: now
     });
 
-    // Generate custom token for immediate login
-    const token = await auth.createCustomToken(userRecord.uid);
-
+    const token = generateToken(ref.id);
     res.json({
-      success: true,
-      uid: userRecord.uid,
-      token,
-      plan: 'trial',
-      trialExpiresAt: trialExpiry.toISOString()
+      success: true, token,
+      user: { uid: ref.id, mobile, sellerName, gstNumber: gstNumber || null, email: email.toLowerCase(), accountStatus: 'ACTIVE', createdAt: new Date().toISOString() },
+      license: { status: 'active', totalCredits: 50, usedCredits: 0, remainingCredits: 50, active: true }
     });
-  } catch (err) {
-    console.error('[Auth] Registration error:', err);
-    if (err.code === 'auth/email-already-exists') {
-      return res.status(409).json({ error: 'Email already registered' });
-    }
-    res.status(500).json({ error: err.message });
-  }
+  } catch (err) { console.error('[Auth] Register:', err); res.status(500).json({ error: err.message }); }
 });
 
-// Login
+// POST /api/auth/login
 router.post('/login', async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { mobileOrEmail, password } = req.body;
+    if (!mobileOrEmail || !password) return res.status(400).json({ error: 'Credentials required' });
 
-    if (!email || !password) {
-      return res.status(400).json({ error: 'Email and password are required' });
-    }
+    const field = mobileOrEmail.includes('@') ? 'email' : 'mobile';
+    const val = field === 'email' ? mobileOrEmail.toLowerCase() : mobileOrEmail;
+    const snap = await db.collection('users').where(field, '==', val).limit(1).get();
+    if (snap.empty) return res.status(401).json({ error: 'Invalid credentials' });
 
-    // Firebase Admin SDK doesn't support password verification directly
-    // The client app should use Firebase Client SDK for auth
-    // Here we verify the user exists and return their license status
-    const userRecord = await auth.getUserByEmail(email);
+    const doc = snap.docs[0]; const d = doc.data();
+    if (['SUSPENDED', 'BLOCKED', 'DELETED'].includes(d.accountStatus)) return res.status(403).json({ error: `Account ${d.accountStatus.toLowerCase()}. Contact administrator.` });
+    if (!await bcrypt.compare(password, d.passwordHash)) return res.status(401).json({ error: 'Invalid credentials' });
 
-    // Get user document from Firestore
-    const userDoc = await db.collection('users').doc(userRecord.uid).get();
+    await db.collection('users').doc(doc.id).update({ lastLogin: Timestamp.now(), updatedAt: Timestamp.now() });
 
-    if (!userDoc.exists) {
-      return res.status(404).json({ error: 'User profile not found' });
-    }
-
-    const userData = userDoc.data();
-
-    // Update last login
-    await db.collection('users').doc(userRecord.uid).update({
-      lastLogin: Timestamp.now()
+    res.json({
+      success: true, token: generateToken(doc.id),
+      user: { uid: doc.id, mobile: d.mobile, sellerName: d.sellerName, gstNumber: d.gstNumber, email: d.email, accountStatus: d.accountStatus, createdAt: d.createdAt?.toDate?.()?.toISOString() || null },
+      license: getLicense(d),
+      assignedPlan: d.assignedPlan || null
     });
+  } catch (err) { console.error('[Auth] Login:', err); res.status(500).json({ error: err.message }); }
+});
 
-    // Check license/trial status
-    const licenseStatus = checkLicenseStatus(userData);
-
-    // Generate custom token
-    const token = await auth.createCustomToken(userRecord.uid);
-
+// GET /api/auth/bootstrap — single startup call, returns everything
+router.get('/bootstrap', authenticateUser, async (req, res) => {
+  try {
+    const d = req.user;
+    const s = d.accountStatus;
+    if (['SUSPENDED', 'BLOCKED', 'DELETED'].includes(s)) {
+      return res.json({ success: false, kicked: true, reason: s.toLowerCase(), error: `Account ${s.toLowerCase()}` });
+    }
     res.json({
       success: true,
-      uid: userRecord.uid,
-      token,
-      ...licenseStatus,
-      name: userData.name
+      user: { uid: d.uid, mobile: d.mobile, sellerName: d.sellerName, gstNumber: d.gstNumber, email: d.email, accountStatus: d.accountStatus, createdAt: d.createdAt?.toDate?.()?.toISOString() || null },
+      license: getLicense(d),
+      assignedPlan: d.assignedPlan || null
     });
-  } catch (err) {
-    console.error('[Auth] Login error:', err);
-    if (err.code === 'auth/user-not-found') {
-      return res.status(401).json({ error: 'Invalid email or password' });
-    }
-    res.status(500).json({ error: err.message });
-  }
+  } catch (err) { res.status(500).json({ success: false, error: err.message }); }
 });
 
-// Verify token and get license status
-router.post('/verify', async (req, res) => {
+// POST /api/auth/deduct-credit — called after successful accept/print/rtd
+router.post('/deduct-credit', authenticateUser, requireLicense, async (req, res) => {
   try {
-    const { token, uid } = req.body;
-
-    if (!uid) {
-      return res.status(400).json({ error: 'UID is required' });
-    }
-
-    const userDoc = await db.collection('users').doc(uid).get();
-
-    if (!userDoc.exists) {
-      return res.status(404).json({ valid: false, error: 'User not found' });
-    }
-
-    const userData = userDoc.data();
-    const licenseStatus = checkLicenseStatus(userData);
-
-    res.json({
-      valid: licenseStatus.plan !== 'expired',
-      ...licenseStatus,
-      name: userData.name
-    });
-  } catch (err) {
-    console.error('[Auth] Verify error:', err);
-    res.status(500).json({ valid: false, error: err.message });
-  }
+    const { count } = req.body;
+    const result = await deductCredit(req.user.uid, count || 1);
+    if (!result) return res.status(500).json({ error: 'Deduction failed' });
+    res.json({ success: true, usedCredits: result.used, remainingCredits: result.remaining });
+  } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// Forgot password
-router.post('/forgot', async (req, res) => {
+// POST /api/auth/logout
+router.post('/logout', (req, res) => { res.json({ success: true }); });
+
+// PUT /api/auth/profile
+router.put('/profile', authenticateUser, async (req, res) => {
   try {
-    const { email } = req.body;
-
-    if (!email) {
-      return res.status(400).json({ error: 'Email is required' });
-    }
-
-    // Generate password reset link
-    const link = await auth.generatePasswordResetLink(email);
-
-    // In production, send this via email service
-    // For now, return success
-    res.json({ success: true, message: 'Password reset link generated' });
-  } catch (err) {
-    console.error('[Auth] Forgot password error:', err);
-    res.status(500).json({ error: err.message });
-  }
+    const { sellerName, gstNumber } = req.body;
+    const u = { updatedAt: Timestamp.now() };
+    if (sellerName) u.sellerName = sellerName;
+    if (gstNumber !== undefined) u.gstNumber = gstNumber || null;
+    await db.collection('users').doc(req.user.uid).update(u);
+    res.json({ success: true });
+  } catch (err) { res.status(500).json({ error: err.message }); }
 });
-
-function checkLicenseStatus(userData) {
-  const now = new Date();
-
-  // Check if active plan exists
-  if (userData.plan === 'active' && userData.planExpiresAt) {
-    const expiry = userData.planExpiresAt.toDate();
-    if (expiry > now) {
-      return {
-        plan: 'active',
-        expiresAt: expiry.toISOString(),
-        daysRemaining: Math.ceil((expiry - now) / (1000 * 60 * 60 * 24))
-      };
-    }
-  }
-
-  // Check trial
-  if (userData.trialExpiresAt) {
-    const trialExpiry = userData.trialExpiresAt.toDate();
-    if (trialExpiry > now) {
-      return {
-        plan: 'trial',
-        expiresAt: trialExpiry.toISOString(),
-        daysRemaining: Math.ceil((trialExpiry - now) / (1000 * 60 * 60 * 24))
-      };
-    }
-  }
-
-  return { plan: 'expired', expiresAt: null, daysRemaining: 0 };
-}
 
 module.exports = router;

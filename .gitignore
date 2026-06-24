@@ -41,3 +41,4 @@ backend/serviceAccountKey.json
 
 # Package lock optional (remove this line if you want lock files)
 # package-lock.json
+serviceAccountKey.json
