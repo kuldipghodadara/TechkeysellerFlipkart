@@ -322,7 +322,7 @@ class RegistryApiClient {
       pageNum++;
     }
 
-    return all.map(s => this._mapShipment(s, status));
+    return all;
   }
 
   // === Convenience methods for each status ===
@@ -582,8 +582,11 @@ class RegistryApiClient {
         s = await this.fetchOrderDetail(id);
       }
       if (!s) {
+        console.error(`[RegistryClient] printLabels: shipment ${id} not found in cache or via fetchOrderDetail`);
         throw new Error(`Shipment ${id} not found`);
       }
+
+      console.log(`[RegistryClient] printLabels: shippingId=${s.shippingId} groupId=${s.groupId} sellerPrice=${s.sellerPrice} channelOfSale=${s.channelOfSale}`);
 
       groups.push({
         group_id: s.groupId,
@@ -599,7 +602,7 @@ class RegistryApiClient {
       });
     }
 
-    const payload = {
+    const body = JSON.stringify({
       timestamp: new Date().toISOString(),
       status: reprint ? 'pendingRTD' : 'pendingLabel',
       view: 'group_shipment',
@@ -608,10 +611,67 @@ class RegistryApiClient {
       location_id: this.sellerConstants.locationId,
       seller_id: this.sellerConstants.sellerId,
       printer_setting: {}
-    };
+    });
 
     const url = `https://seller.flipkart.com/napi/my-orders/revamped-orders-print?reprint=${reprint}`;
-    return await this._makeRequest(url, JSON.stringify(payload), true);
+
+    // Print API requires Accept: application/pdf and FK-CSRF-TOKEN (uppercase)
+    return new Promise((resolve, reject) => {
+      const headers = {
+        'Content-Type': 'application/json',
+        'Accept': 'application/pdf',
+        'FK-CSRF-TOKEN': this.authTokens.csrfToken || '',
+        'X-Requested-With': 'XMLHttpRequest',
+        'Origin': 'https://seller.flipkart.com',
+        'Referer': 'https://seller.flipkart.com/index.html',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+      };
+      if (this.authTokens.cookie) headers['Cookie'] = this.authTokens.cookie;
+
+      if (!this.authTokens.csrfToken && !this.authTokens.cookie) { reject(new Error('NO_AUTH')); return; }
+
+      console.log(`[RegistryClient] PRINT POST ${url} groups:${groups.length}`);
+
+      const request = net.request({ method: 'POST', url });
+      Object.entries(headers).forEach(([k, v]) => { try { request.setHeader(k, v); } catch (e) {} });
+      request.write(body);
+
+      request.on('response', (response) => {
+        const statusCode = response.statusCode;
+        const contentType = (response.headers['content-type'] || '').toLowerCase();
+        console.log(`[RegistryClient] PRINT Response ${statusCode} content-type:${contentType} content-length:${response.headers['content-length'] || '?'}`);
+
+        if (statusCode === 401 || statusCode === 403) { reject(new Error('SESSION_EXPIRED')); return; }
+
+        const chunks = [];
+        response.on('data', (chunk) => chunks.push(chunk));
+        response.on('end', () => {
+          const buf = Buffer.concat(chunks);
+          console.log(`[RegistryClient] PRINT buffer size: ${buf.length} bytes, first4: ${buf.length > 4 ? buf.slice(0, 4).toString('ascii') : 'empty'}`);
+
+          if (buf.length === 0) { reject(new Error('Empty print response')); return; }
+
+          // Check if response is PDF
+          if (buf.length > 4 && buf.slice(0, 4).toString('ascii') === '%PDF') {
+            resolve(buf);
+            return;
+          }
+
+          // Not PDF — try to parse as JSON error
+          try {
+            const errBody = JSON.parse(buf.toString('utf8'));
+            console.error(`[RegistryClient] PRINT returned JSON instead of PDF:`, JSON.stringify(errBody).substring(0, 300));
+            reject(new Error(errBody.message || errBody.error || 'Print API returned non-PDF response'));
+          } catch {
+            console.error(`[RegistryClient] PRINT returned non-PDF, non-JSON. First 200 chars: ${buf.toString('utf8').substring(0, 200)}`);
+            reject(new Error('Print API returned invalid response'));
+          }
+        });
+      });
+
+      request.on('error', (err) => { console.error('[RegistryClient] PRINT error:', err.message); reject(err); });
+      request.end();
+    });
   }
 
   async fetchOTC() {

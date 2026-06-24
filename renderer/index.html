@@ -12,30 +12,74 @@
 
 <body>
 
-    <!-- Screen: Account Picker -->
-    <div id="screen-accounts" class="screen active">
+    <!-- Screen: Software Auth (Login/Register) -->
+    <div id="screen-auth" class="screen active">
+        <div class="auth-shell">
+            <div class="auth-card" style="width:440px;">
+                <div class="auth-logo">S</div>
+                <h1 class="auth-title">Seller Dashboard</h1>
+                <p class="auth-subtitle">Sign in or create an account</p>
+
+                <!-- Auth Tabs -->
+                <div class="auth-tabs">
+                    <button class="auth-tab active" data-tab="login" id="tab-login">Login</button>
+                    <button class="auth-tab" data-tab="register" id="tab-register">Registration</button>
+                </div>
+
+                <!-- Login Form -->
+                <div id="auth-form-login" class="auth-form-panel">
+                    <input type="text" id="login-mobile-email" placeholder="Mobile Number or Email" class="input">
+                    <div style="position:relative; margin-top:8px;">
+                        <input type="password" id="login-password" placeholder="Password" class="input" style="width:100%; padding-right:40px; margin:0;">
+                        <button type="button" class="btn-eye" onclick="togglePwdVis('login-password', this)">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                        </button>
+                    </div>
+                    <button id="btn-auth-login" class="btn btn-primary full-w" style="margin-top:12px;">Login</button>
+                    <p id="login-error" class="error-text" style="display:none;"></p>
+                </div>
+
+                <!-- Register Form -->
+                <div id="auth-form-register" class="auth-form-panel" style="display:none;">
+                    <input type="text" id="reg-mobile" placeholder="Mobile Number *" class="input">
+                    <input type="text" id="reg-seller-name" placeholder="Seller Name *" class="input" style="margin-top:8px;">
+                    <input type="text" id="reg-gst" placeholder="GST Number (optional)" class="input" style="margin-top:8px;">
+                    <input type="email" id="reg-email" placeholder="Email *" class="input" style="margin-top:8px;">
+                    <div style="position:relative; margin-top:8px;">
+                        <input type="password" id="reg-password" placeholder="Password (min 6 chars) *" class="input" style="width:100%; padding-right:40px; margin:0;">
+                        <button type="button" class="btn-eye" onclick="togglePwdVis('reg-password', this)">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                        </button>
+                    </div>
+                    <div style="position:relative; margin-top:8px;">
+                        <input type="password" id="reg-confirm-password" placeholder="Confirm Password *" class="input" style="width:100%; padding-right:40px; margin:0;">
+                        <button type="button" class="btn-eye" onclick="togglePwdVis('reg-confirm-password', this)">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                        </button>
+                    </div>
+                    <button id="btn-auth-register" class="btn btn-primary full-w" style="margin-top:12px;">Create Account</button>
+                    <p id="register-error" class="error-text" style="display:none;"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Screen: Flipkart Account Picker -->
+    <div id="screen-accounts" class="screen">
         <div class="auth-shell">
             <div class="auth-card">
                 <div class="auth-logo">S</div>
-                <h1 class="auth-title">Seller Dashboard</h1>
-                <p class="auth-subtitle">Select an account to continue</p>
+                <h1 class="auth-title">Flipkart Account</h1>
+                <p class="auth-subtitle">Select a Flipkart seller account</p>
                 <div id="account-list" class="account-list"></div>
                 <button id="btn-show-add" class="btn btn-outline full-w" style="margin-top:16px;">+ Add Account</button>
                 <div id="add-account-form" style="display:none; margin-top:16px;">
                     <input type="text" id="new-acc-name" placeholder="Display Name" class="input">
-                    <input type="email" id="new-acc-email" placeholder="Email / Mobile" class="input"
-                        style="margin-top:8px;">
+                    <input type="email" id="new-acc-email" placeholder="Email / Mobile" class="input" style="margin-top:8px;">
                     <div style="position:relative; margin-top:8px;">
-                        <input type="password" id="new-acc-password" placeholder="Password" class="input"
-                            style="width: 100%; padding-right: 40px; margin: 0;">
-                        <button type="button" id="btn-toggle-password"
-                            style="position:absolute; right:12px; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; color:#64748b; padding:0; display:flex; align-items:center; justify-content:center;">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
-                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                stroke-linejoin="round" id="eye-icon">
-                                <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
-                                <circle cx="12" cy="12" r="3" />
-                            </svg>
+                        <input type="password" id="new-acc-password" placeholder="Password" class="input" style="width:100%; padding-right:40px; margin:0;">
+                        <button type="button" id="btn-toggle-password" class="btn-eye">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="eye-icon"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
                         </button>
                     </div>
                     <div style="display:flex; gap:8px; margin-top:12px;">
@@ -45,6 +89,7 @@
                     <p id="add-error" class="error-text" style="display:none;"></p>
                 </div>
                 <p id="accounts-status" class="auth-subtitle" style="margin-top:12px; font-size:12px;"></p>
+                <button id="btn-software-logout" class="btn btn-ghost full-w" style="margin-top:12px; font-size:12px; color:var(--danger);">Logout from Software</button>
             </div>
         </div>
     </div>
@@ -52,18 +97,13 @@
     <!-- Screen: OTP Verification -->
     <div id="screen-otp" class="screen">
         <div class="auth-shell">
-            <div class="auth-card" style="padding: 40px 32px; text-align: center;">
-                <div class="auth-logo"
-                    style="background-color: #2563eb; color: white; border-radius: 12px; width: 56px; height: 56px; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; font-size: 24px;">
-                    🔐</div>
+            <div class="auth-card" style="padding:40px 32px; text-align:center;">
+                <div class="auth-logo" style="background-color:#2563eb; color:white; border-radius:12px; width:56px; height:56px; display:flex; align-items:center; justify-content:center; margin:0 auto 16px; font-size:24px;">🔐</div>
                 <h1 class="auth-title">Enter OTP</h1>
-                <p class="auth-subtitle" id="otp-subtitle" style="margin-bottom: 16px;">We've sent an OTP to your
-                    registered number</p>
-                <input type="text" id="otp-input" placeholder="Enter 6-digit OTP" class="input" maxlength="6" autofocus
-                    style="margin-bottom: 16px; text-align: center;">
+                <p class="auth-subtitle" id="otp-subtitle" style="margin-bottom:16px;">We've sent an OTP to your registered number</p>
+                <input type="text" id="otp-input" placeholder="Enter 6-digit OTP" class="input" maxlength="6" autofocus style="margin-bottom:16px; text-align:center;">
                 <button id="btn-verify-otp" class="btn btn-primary full-w">Verify OTP</button>
-                <button id="btn-back-accounts" class="btn btn-ghost full-w" style="margin-top:8px;">Back to
-                    Accounts</button>
+                <button id="btn-back-accounts" class="btn btn-ghost full-w" style="margin-top:8px;">Back to Accounts</button>
                 <p id="otp-error" class="error-text" style="display:none;"></p>
                 <div id="otp-spinner" class="spinner" style="display:none;"></div>
             </div>
@@ -81,86 +121,50 @@
                 </div>
                 <nav class="sidebar-nav">
                     <button class="nav-btn active" data-view="dashboard">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" class="nav-icon">
-                            <rect width="7" height="9" x="3" y="3" rx="1" />
-                            <rect width="7" height="5" x="14" y="3" rx="1" />
-                            <rect width="7" height="9" x="14" y="12" rx="1" />
-                            <rect width="7" height="5" x="3" y="16" rx="1" />
-                        </svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" class="nav-icon"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
                         Dashboard
                     </button>
                     <button class="nav-btn" data-view="to-accept">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" class="nav-icon">
-                            <polyline points="22 12 16 12 14 15 10 15 8 12 2 12" />
-                            <path
-                                d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z" />
-                        </svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" class="nav-icon"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>
                         To Accept
                     </button>
                     <button class="nav-btn" data-view="to-pack">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" class="nav-icon">
-                            <path
-                                d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
-                            <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
-                            <line x1="12" y1="22.08" x2="12" y2="12" />
-                        </svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" class="nav-icon"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
                         To Pack
                     </button>
                     <button class="nav-btn" data-view="pending-dispatch">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" class="nav-icon">
-                            <path d="M5 18H3c-.6 0-1-.4-1-1V7c0-.6.4-1 1-1h10c.6 0 1 .4 1 1v11" />
-                            <path d="M14 9h4l4 4v4c0 .6-.4 1-1 1h-2" />
-                            <circle cx="7" cy="18" r="2" />
-                            <circle cx="17" cy="18" r="2" />
-                        </svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" class="nav-icon"><path d="M5 18H3c-.6 0-1-.4-1-1V7c0-.6.4-1 1-1h10c.6 0 1 .4 1 1v11"/><path d="M14 9h4l4 4v4c0 .6-.4 1-1 1h-2"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/></svg>
                         Pending Dispatch
                     </button>
                     <button class="nav-btn" data-view="in-transit">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" class="nav-icon">
-                            <path
-                                d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-1.1 0-2 .9-2 2v9c0 .5.4 1 1 1h2" />
-                            <circle cx="7" cy="17" r="2" />
-                            <circle cx="17" cy="17" r="2" />
-                        </svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" class="nav-icon"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-1.1 0-2 .9-2 2v9c0 .5.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/></svg>
                         In Transit
                     </button>
                     <button class="nav-btn" data-view="completed">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" class="nav-icon">
-                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-                            <polyline points="22 4 12 14.01 9 11.01" />
-                        </svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" class="nav-icon"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
                         Completed
                     </button>
                     <button class="nav-btn" data-view="upcoming">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" class="nav-icon">
-                            <circle cx="12" cy="12" r="10" />
-                            <polyline points="12 6 12 12 16 14" />
-                        </svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" class="nav-icon"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                         Upcoming
                     </button>
+                    <div style="border-top:1px solid var(--border); margin:8px 0;"></div>
+                    <button class="nav-btn" data-view="profile">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" class="nav-icon"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                        Profile
+                    </button>
+                    <button class="nav-btn" data-view="plan">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" class="nav-icon"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg>
+                        Plan
+                    </button>
                     <button class="nav-btn" data-view="settings">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" class="nav-icon">
-                            <path
-                                d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
-                            <circle cx="12" cy="12" r="3" />
-                        </svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" class="nav-icon"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
                         Settings
                     </button>
                 </nav>
                 <div class="sidebar-footer">
-                    <div id="current-account-name"
-                        style="text-align: center; font-size: 13px; font-weight: 600; margin-bottom: 12px; color: var(--primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 8px;">
-                    </div>
-                    <button id="btn-switch-account" class="btn btn-ghost full-w" style="font-size:13px;">Switch
-                        Account</button>
+                    <div id="current-account-name" style="text-align:center; font-size:13px; font-weight:600; margin-bottom:12px; color:var(--primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; padding:0 8px;"></div>
+                    <button id="btn-switch-account" class="btn btn-ghost full-w" style="font-size:13px;">Switch Account</button>
                 </div>
             </aside>
 
@@ -169,300 +173,147 @@
                 <header class="topbar">
                     <h2 id="page-heading">Dashboard</h2>
                     <div class="topbar-right">
+                        <span id="credit-status-bar" class="credit-bar green" style="display:none;"></span>
+                        <span id="plan-badge" class="status-badge" style="display:none;"></span>
                         <span id="connection-status" class="status-badge">Not Connected</span>
                         <span id="last-updated" class="meta-text"></span>
                     </div>
                 </header>
 
                 <div id="session-banner" class="session-banner" style="display:none;">
-                    Session expired. <button id="btn-relogin" class="btn btn-sm btn-primary"
-                        style="margin-left:8px;">Re-Login</button>
+                    Session expired. <button id="btn-relogin" class="btn btn-sm btn-primary" style="margin-left:8px;">Re-Login</button>
+                </div>
+
+                <!-- Plan Expired Overlay -->
+                <div id="plan-expired-overlay" class="plan-overlay" style="display:none;">
+                    <div class="plan-overlay-card">
+                        <div style="font-size:48px; margin-bottom:16px;">&#128274;</div>
+                        <h2 id="plan-expired-message">No credits remaining.</h2>
+                        <p style="color:var(--text-secondary); margin:8px 0 16px;">Contact administrator or click Sync License to refresh.</p>
+                        <p class="meta-text">Flipkart features are disabled.</p>
+                    </div>
                 </div>
 
                 <!-- View: Dashboard -->
                 <section id="view-dashboard" class="view active">
                     <div class="stat-grid">
-                        <div class="stat-card" data-nav="to-accept">
-                            <div class="stat-label">To Accept</div>
-                            <div class="stat-value" id="stat-to-accept">-</div>
+                        <div class="stat-card" data-nav="to-accept"><div class="stat-label">To Accept</div><div class="stat-value" id="stat-to-accept">-</div></div>
+                        <div class="stat-card" data-nav="to-pack"><div class="stat-label">To Pack</div><div class="stat-value" id="stat-to-pack">-</div></div>
+                        <div class="stat-card" data-nav="pending-dispatch"><div class="stat-label">Pending Dispatch</div><div class="stat-value" id="stat-to-dispatch">-</div></div>
+                        <div class="stat-card" data-nav="in-transit"><div class="stat-label">In Transit</div><div class="stat-value" id="stat-in-transit">-</div></div>
+                        <div class="stat-card" data-nav="upcoming"><div class="stat-label">Upcoming</div><div class="stat-value" id="stat-upcoming">-</div></div>
+                        <div class="stat-card" data-nav="completed"><div class="stat-label">Completed</div><div class="stat-value" id="stat-completed">-</div></div>
+                    </div>
+                    <div id="dashboard-plan-card" class="plan-info-card" style="display:none; margin-top:16px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <div>
+                                <div class="meta-text" style="font-size:11px; text-transform:uppercase; letter-spacing:0.5px;">Current Plan</div>
+                                <div class="plan-card-name" style="font-size:18px; font-weight:700; color:var(--primary); margin-top:2px;">-</div>
+                            </div>
+                            <span class="plan-card-status badge badge-green">Active</span>
                         </div>
-                        <div class="stat-card" data-nav="to-pack">
-                            <div class="stat-label">To Pack</div>
-                            <div class="stat-value" id="stat-to-pack">-</div>
-                        </div>
-                        <div class="stat-card" data-nav="pending-dispatch">
-                            <div class="stat-label">Pending Dispatch</div>
-                            <div class="stat-value" id="stat-to-dispatch">-</div>
-                        </div>
-                        <div class="stat-card" data-nav="in-transit">
-                            <div class="stat-label">In Transit</div>
-                            <div class="stat-value" id="stat-in-transit">-</div>
-                        </div>
-                        <div class="stat-card" data-nav="upcoming">
-                            <div class="stat-label">Upcoming</div>
-                            <div class="stat-value" id="stat-upcoming">-</div>
-                        </div>
-                        <div class="stat-card" data-nav="completed">
-                            <div class="stat-label">Completed</div>
-                            <div class="stat-value" id="stat-completed">-</div>
+                        <div style="display:flex; gap:24px; margin-top:12px;">
+                            <div><div class="meta-text" style="font-size:11px;">Remaining Credits</div><div class="plan-card-remaining" style="font-size:22px; font-weight:700;">0</div></div>
+                            <div><div class="meta-text" style="font-size:11px;">Cost Per Order</div><div class="plan-card-cpo" style="font-size:16px; font-weight:600;">-</div></div>
                         </div>
                     </div>
                 </section>
 
                 <!-- View: To Accept -->
                 <section id="view-to-accept" class="view table-view">
-                    <div id="loader-to-accept" class="page-loader" style="display:none;">
-                        <div class="spinner"></div><span id="loader-text-to-accept">Loading orders...</span>
-                    </div>
-
-                    <!-- Bulk Actions Toolbar -->
-                    <div class="view-toolbar" id="toolbar-to-accept"
-                        style="display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 16px; padding: 12px; background: var(--bg-hover); border-radius: var(--radius);">
-                        <div style="display: flex; align-items: center; gap: 12px;">
-                            <input type="checkbox" id="checkbox-to-accept-select-all"
-                                style="width: 18px; height: 18px; cursor: pointer;">
-                            <span id="to-accept-selected-count"
-                                style="font-size: 13px; font-weight: 600; color: var(--text-secondary);">0
-                                selected</span>
+                    <div id="loader-to-accept" class="page-loader" style="display:none;"><div class="spinner"></div><span>Loading orders...</span></div>
+                    <div class="view-toolbar" style="display:flex; justify-content:space-between; align-items:center; gap:16px; margin-bottom:16px; padding:12px; background:var(--bg-hover); border-radius:var(--radius);">
+                        <div style="display:flex; align-items:center; gap:12px;">
+                            <input type="checkbox" id="checkbox-to-accept-select-all" style="width:18px; height:18px; cursor:pointer;">
+                            <span id="to-accept-selected-count" style="font-size:13px; font-weight:600; color:var(--text-secondary);">0 selected</span>
                         </div>
-                        <div style="display: flex; gap: 8px;">
-                            <button id="btn-bulk-accept" class="btn btn-primary" disabled>
-                                Accept Selected
-                            </button>
+                        <div style="display:flex; gap:8px;">
+                            <button id="btn-bulk-accept" class="btn btn-primary" disabled>Accept Selected</button>
                         </div>
                     </div>
-
-                    <div class="table-shell">
-                        <table class="data-table">
-                            <thead>
-                                <tr>
-                                    <th style="width: 50px; text-align: center;">Select</th>
-                                    <th>Order ID</th>
-                                    <th>SKU</th>
-                                    <th>Product</th>
-                                    <th>Qty</th>
-                                    <th>Price</th>
-                                    <th>Dispatch By</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tbody-to-accept">
-                                <tr>
-                                    <td colspan="8" class="empty-state">No data</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+                    <div class="table-shell"><table class="data-table"><thead><tr><th style="width:50px; text-align:center;">Select</th><th>Order ID</th><th>SKU</th><th>Product</th><th>Qty</th><th>Price</th><th>Dispatch By</th><th>Actions</th></tr></thead><tbody id="tbody-to-accept"><tr><td colspan="8" class="empty-state">No data</td></tr></tbody></table></div>
                 </section>
 
                 <!-- View: To Pack -->
                 <section id="view-to-pack" class="view table-view">
-                    <div id="loader-to-pack" class="page-loader" style="display:none;">
-                        <div class="spinner"></div>Loading to-pack data...
-                    </div>
-
-                    <!-- SKU Summary Section -->
-                    <div class="settings-card" style="margin-bottom: 20px; max-width: 100%;">
-                        <h3 style="margin-bottom: 8px;">SKU Summary</h3>
-                        <div class="table-shell" style="max-height: 200px; overflow-y: auto;">
-                            <table class="data-table">
-                                <thead>
-                                    <tr>
-                                        <th>SKU</th>
-                                        <th>Total Qty (Orders)</th>
-                                        <th>Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="tbody-to-pack-summary">
-                                    <tr>
-                                        <td colspan="3" class="empty-state">No data</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <!-- Bulk Actions Toolbar -->
-                    <div class="view-toolbar"
-                        style="display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 16px; padding: 12px; background: var(--bg-hover); border-radius: var(--radius);">
-                        <div style="display: flex; align-items: center; gap: 12px;">
-                            <input type="checkbox" id="checkbox-to-pack-select-all"
-                                style="width: 18px; height: 18px; cursor: pointer;">
-                            <span id="to-pack-selected-count"
-                                style="font-size: 13px; font-weight: 600; color: var(--text-secondary);">0
-                                selected</span>
+                    <div id="loader-to-pack" class="page-loader" style="display:none;"><div class="spinner"></div>Loading to-pack data...</div>
+                    <div class="settings-card" style="margin-bottom:20px; max-width:100%;"><h3 style="margin-bottom:8px;">SKU Summary</h3><div class="table-shell" style="max-height:200px; overflow-y:auto;"><table class="data-table"><thead><tr><th>SKU</th><th>Total Qty (Orders)</th><th>Status</th></tr></thead><tbody id="tbody-to-pack-summary"><tr><td colspan="3" class="empty-state">No data</td></tr></tbody></table></div></div>
+                    <div class="view-toolbar" style="display:flex; justify-content:space-between; align-items:center; gap:16px; margin-bottom:16px; padding:12px; background:var(--bg-hover); border-radius:var(--radius);">
+                        <div style="display:flex; align-items:center; gap:12px;">
+                            <input type="checkbox" id="checkbox-to-pack-select-all" style="width:18px; height:18px; cursor:pointer;">
+                            <span id="to-pack-selected-count" style="font-size:13px; font-weight:600; color:var(--text-secondary);">0 selected</span>
                             <button id="btn-to-pack-select-all" class="btn btn-sm btn-ghost" style="font-size:12px; padding:4px 10px;">Select All</button>
                             <button id="btn-to-pack-deselect-all" class="btn btn-sm btn-ghost" style="font-size:12px; padding:4px 10px;">Deselect All</button>
                         </div>
-                        <div style="display: flex; gap: 8px;">
-                            <button id="btn-bulk-print" class="btn btn-outline" disabled>
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
-                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                    stroke-linejoin="round">
-                                    <path
-                                        d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
-                                    <path d="M6 9V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v5" />
-                                    <rect x="6" y="14" width="12" height="8" rx="1" />
-                                </svg>
-                                Bulk Print
-                            </button>
-                            <button id="btn-bulk-rtd" class="btn btn-primary" disabled>
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
-                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                    stroke-linejoin="round">
-                                    <polyline points="22 12 16 12 14 15 10 15 8 12 2 12" />
-                                    <path
-                                        d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z" />
-                                </svg>
-                                Bulk RTD
-                            </button>
+                        <div style="display:flex; gap:8px;">
+                            <button id="btn-bulk-print" class="btn btn-outline" disabled>Bulk Print</button>
+                            <button id="btn-bulk-rtd" class="btn btn-primary" disabled>Bulk RTD</button>
                         </div>
                     </div>
-
-                    <!-- Detailed Orders List -->
-                    <div class="table-shell" style="flex: 1; overflow-y: auto;">
-                        <table class="data-table">
-                            <thead>
-                                <tr>
-                                    <th style="width: 50px; text-align: center;">Select</th>
-                                    <th>Order ID</th>
-                                    <th>SKU</th>
-                                    <th>Product</th>
-                                    <th>Qty</th>
-                                    <th>Price</th>
-                                    <th>Label status</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tbody-to-pack-details">
-                                <tr>
-                                    <td colspan="8" class="empty-state">No data</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+                    <div class="table-shell" style="flex:1; overflow-y:auto;"><table class="data-table"><thead><tr><th style="width:50px; text-align:center;">Select</th><th>Order ID</th><th>SKU</th><th>Product</th><th>Qty</th><th>Price</th><th>Label status</th><th>Actions</th></tr></thead><tbody id="tbody-to-pack-details"><tr><td colspan="8" class="empty-state">No data</td></tr></tbody></table></div>
                 </section>
 
                 <!-- View: Pending Dispatch -->
                 <section id="view-pending-dispatch" class="view table-view">
-                    <div id="loader-pending-dispatch" class="page-loader" style="display:none;">
-                        <div class="spinner"></div>Loading pending dispatch...
-                    </div>
-                    <div id="otc-banner" class="settings-card" style="margin-bottom: 16px; max-width: 100%; display: none;">
-                        <div style="display:flex; align-items:center; gap:12px;">
-                            <span style="font-size:18px;">📦</span>
-                            <div>
-                                <h3 style="margin:0;">Pickup OTC</h3>
-                                <p id="otc-value" class="meta-text" style="margin:4px 0 0;">-</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="table-shell">
-                        <table class="data-table">
-                            <thead>
-                                <tr>
-                                    <th>Order ID</th>
-                                    <th>SKU</th>
-                                    <th>Qty</th>
-                                    <th>Dispatch By</th>
-                                    <th>Courier</th>
-                                    <th>Tracking</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tbody-pending-dispatch">
-                                <tr>
-                                    <td colspan="6" class="empty-state">No data</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+                    <div id="loader-pending-dispatch" class="page-loader" style="display:none;"><div class="spinner"></div>Loading pending dispatch...</div>
+                    <div id="otc-banner" class="settings-card" style="margin-bottom:16px; max-width:100%; display:none;"><div style="display:flex; align-items:center; gap:12px;"><span style="font-size:18px;">📦</span><div><h3 style="margin:0;">Pickup OTC</h3><p id="otc-value" class="meta-text" style="margin:4px 0 0;">-</p></div></div></div>
+                    <div class="table-shell"><table class="data-table"><thead><tr><th>Order ID</th><th>SKU</th><th>Qty</th><th>Dispatch By</th><th>Courier</th><th>Tracking</th></tr></thead><tbody id="tbody-pending-dispatch"><tr><td colspan="6" class="empty-state">No data</td></tr></tbody></table></div>
                 </section>
 
                 <!-- View: In Transit -->
                 <section id="view-in-transit" class="view table-view">
-                    <div id="loader-in-transit" class="page-loader" style="display:none;">
-                        <div class="spinner"></div>Loading in-transit orders...
-                    </div>
-                    <div class="table-shell">
-                        <table class="data-table">
-                            <thead>
-                                <tr>
-                                    <th>Order ID</th>
-                                    <th>SKU</th>
-                                    <th>Status</th>
-                                    <th>Qty</th>
-                                    <th>Courier</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tbody-in-transit">
-                                <tr>
-                                    <td colspan="5" class="empty-state">No data</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+                    <div id="loader-in-transit" class="page-loader" style="display:none;"><div class="spinner"></div>Loading in-transit orders...</div>
+                    <div class="table-shell"><table class="data-table"><thead><tr><th>Order ID</th><th>SKU</th><th>Status</th><th>Qty</th><th>Courier</th></tr></thead><tbody id="tbody-in-transit"><tr><td colspan="5" class="empty-state">No data</td></tr></tbody></table></div>
                 </section>
 
                 <!-- View: Completed -->
                 <section id="view-completed" class="view table-view">
-                    <div class="view-toolbar">
-                        <button id="btn-export" class="btn btn-outline">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
-                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                stroke-linejoin="round">
-                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                                <polyline points="7 10 12 15 17 10" />
-                                <line x1="12" y1="15" x2="12" y2="3" />
-                            </svg>
-                            Export CSV
-                        </button>
-                    </div>
-                    <div id="loader-completed" class="page-loader" style="display:none;">
-                        <div class="spinner"></div>Loading completed orders...
-                    </div>
-                    <div class="table-shell">
-                        <table class="data-table">
-                            <thead>
-                                <tr>
-                                    <th>Order ID</th>
-                                    <th>SKU</th>
-                                    <th>Status</th>
-                                    <th>Qty</th>
-                                    <th>Dispatch Date</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tbody-completed">
-                                <tr>
-                                    <td colspan="5" class="empty-state">No data</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+                    <div class="view-toolbar"><button id="btn-export" class="btn btn-outline">Export CSV</button></div>
+                    <div id="loader-completed" class="page-loader" style="display:none;"><div class="spinner"></div>Loading completed orders...</div>
+                    <div class="table-shell"><table class="data-table"><thead><tr><th>Order ID</th><th>SKU</th><th>Status</th><th>Qty</th><th>Dispatch Date</th></tr></thead><tbody id="tbody-completed"><tr><td colspan="5" class="empty-state">No data</td></tr></tbody></table></div>
                 </section>
 
                 <!-- View: Upcoming -->
                 <section id="view-upcoming" class="view table-view">
-                    <div id="loader-upcoming" class="page-loader" style="display:none;">
-                        <div class="spinner"></div>Loading upcoming orders...
+                    <div id="loader-upcoming" class="page-loader" style="display:none;"><div class="spinner"></div>Loading upcoming orders...</div>
+                    <div class="table-shell"><table class="data-table"><thead><tr><th>Order ID</th><th>SKU</th><th>Product</th><th>Qty</th><th>Price</th><th>Dispatch After</th></tr></thead><tbody id="tbody-upcoming"><tr><td colspan="6" class="empty-state">No data</td></tr></tbody></table></div>
+                </section>
+
+                <!-- View: Profile -->
+                <section id="view-profile" class="view">
+                    <div class="settings-card" style="max-width:500px;">
+                        <h3>My Profile</h3>
+                        <div id="profile-content" style="margin-top:12px;">
+                            <div class="profile-row"><span class="profile-label">Seller Name</span><span id="profile-seller-name">-</span></div>
+                            <div class="profile-row"><span class="profile-label">Mobile</span><span id="profile-mobile">-</span></div>
+                            <div class="profile-row"><span class="profile-label">GST Number</span><span id="profile-gst">-</span></div>
+                            <div class="profile-row"><span class="profile-label">Email</span><span id="profile-email">-</span></div>
+                            <div class="profile-row"><span class="profile-label">Registered</span><span id="profile-created">-</span></div>
+                            <div class="profile-row"><span class="profile-label">Credits</span><span id="profile-credits">-</span></div>
+                        </div>
                     </div>
-                    <div class="table-shell">
-                        <table class="data-table">
-                            <thead>
-                                <tr>
-                                    <th>Order ID</th>
-                                    <th>SKU</th>
-                                    <th>Product</th>
-                                    <th>Qty</th>
-                                    <th>Price</th>
-                                    <th>Dispatch After</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tbody-upcoming">
-                                <tr>
-                                    <td colspan="6" class="empty-state">No data</td>
-                                </tr>
-                            </tbody>
-                        </table>
+                </section>
+
+                <!-- View: Plan -->
+                <section id="view-plan" class="view">
+                    <div class="settings-card" style="max-width:500px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <h3>Credits</h3>
+                            <button id="btn-sync-license" class="btn btn-sm btn-outline">Sync License</button>
+                        </div>
+                        <div id="plan-content" style="margin-top:12px;">
+                            <div class="profile-row"><span class="profile-label">Current Plan</span><span id="plan-type">-</span></div>
+                            <div class="profile-row"><span class="profile-label">Status</span><span id="plan-status">-</span></div>
+                            <div class="profile-row"><span class="profile-label">Total Credits</span><span id="plan-total-credits">0</span></div>
+                            <div class="profile-row"><span class="profile-label">Used Credits</span><span id="plan-used-credits">0</span></div>
+                            <div class="profile-row"><span class="profile-label">Remaining</span><span id="plan-remaining-credits" style="font-weight:700;">0</span></div>
+                            <div class="profile-row"><span class="profile-label">Price</span><span id="plan-price">-</span></div>
+                            <div class="profile-row"><span class="profile-label">Cost Per Order</span><span id="plan-cost-per-order">-</span></div>
+                        </div>
+                        <div id="plan-warning" class="plan-warning-card" style="display:none; margin-top:16px;">
+                            <p style="font-weight:600; color:var(--danger);">No credits remaining</p>
+                            <p class="meta-text">Contact administrator to add credits.</p>
+                        </div>
                     </div>
                 </section>
 
@@ -473,11 +324,9 @@
                         <div id="settings-accounts"></div>
                         <h3 style="margin-top:24px;">Label Download Settings</h3>
                         <div style="display:flex; flex-direction:column; gap:8px; margin-top:8px;">
-                            <p class="meta-text" style="margin-bottom: 4px;">Labels will be saved to this folder prior
-                                to printing.</p>
+                            <p class="meta-text" style="margin-bottom:4px;">Labels will be saved to this folder prior to printing.</p>
                             <div style="display:flex; gap:8px; align-items:center;">
-                                <input type="text" id="settings-download-folder" class="input" style="flex:1; margin:0;"
-                                    readonly placeholder="No folder selected">
+                                <input type="text" id="settings-download-folder" class="input" style="flex:1; margin:0;" readonly placeholder="No folder selected">
                                 <button id="btn-select-download-folder" class="btn btn-outline">Change Folder</button>
                             </div>
                         </div>
@@ -496,23 +345,12 @@
     <!-- Update Banner UI -->
     <div id="updateOverlay"></div>
     <div id="updateBanner">
-        <div class="update-header">
-            <span style="font-size:18px;">🚀</span>
-            <span id="updateTitle">Update Available</span>
-        </div>
-        <div class="update-body" id="updateMessage">
-            A new version of Seller Dashboard is available.
-        </div>
-        <div class="update-progress-container" id="updateProgressContainer" style="display:none;">
-            <div class="update-progress-bar" id="updateProgressBar"></div>
-        </div>
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px;"
-            id="updateActions">
+        <div class="update-header"><span style="font-size:18px;">🚀</span><span id="updateTitle">Update Available</span></div>
+        <div class="update-body" id="updateMessage">A new version of Seller Dashboard is available.</div>
+        <div class="update-progress-container" id="updateProgressContainer" style="display:none;"><div class="update-progress-bar" id="updateProgressBar"></div></div>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px;">
             <span id="updateStatusText" style="font-size:11px; color:#94a3b8; font-weight:600;"></span>
-            <div style="display:flex; gap:8px;" id="updateButtonsContainer">
-                <button class="btn btn-sm btn-primary" id="btnUpdateAction"
-                    style="border-radius:8px; display:none;">Restart Now</button>
-            </div>
+            <button class="btn btn-sm btn-primary" id="btnUpdateAction" style="border-radius:8px; display:none;">Restart Now</button>
         </div>
     </div>
 

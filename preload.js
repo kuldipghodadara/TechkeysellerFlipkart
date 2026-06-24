@@ -1,11 +1,17 @@
 const { contextBridge, ipcRenderer } = require('electron');
 
 contextBridge.exposeInMainWorld('electronAPI', {
-  // Software Auth (License)
-  login: (email, password) => ipcRenderer.invoke('auth-login', { email, password }),
-  register: (name, email, mobile, password) => ipcRenderer.invoke('auth-register', { name, email, mobile, password }),
-  logout: () => ipcRenderer.invoke('auth-logout'),
-  checkAuth: () => ipcRenderer.invoke('auth-check'),
+  // Software Auth
+  authRegister: (data) => ipcRenderer.invoke('auth-register', data),
+  authLogin: (mobileOrEmail, password) => ipcRenderer.invoke('auth-login', { mobileOrEmail, password }),
+  authLogout: () => ipcRenderer.invoke('auth-logout'),
+  authBootstrap: () => ipcRenderer.invoke('auth-bootstrap'),
+  authGetLicense: () => ipcRenderer.invoke('auth-get-license'),
+  authGetPlan: () => ipcRenderer.invoke('auth-get-plan'),
+  authUpdateProfile: (data) => ipcRenderer.invoke('auth-update-profile', data),
+
+  // License update event (pushed from main after credit deduction)
+  onLicenseUpdated: (cb) => ipcRenderer.on('license-updated', (e, lic) => cb(lic)),
 
   // Flipkart Direct Auth
   fkGetAccounts: () => ipcRenderer.invoke('fk-get-accounts'),
@@ -15,11 +21,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
   fkVerifyOtp: (accountId, otp) => ipcRenderer.invoke('fk-verify-otp', { accountId, otp }),
   fkRestoreSession: (accountId) => ipcRenderer.invoke('fk-restore-session', accountId),
   fkLogout: () => ipcRenderer.invoke('fk-logout'),
+  onSessionExpired: (cb) => ipcRenderer.on('session-expired', () => cb()),
 
-  // Session events
-  onSessionExpired: (callback) => ipcRenderer.on('session-expired', () => callback()),
-
-  // Orders & Stats
+  // Orders
   getDashboardStats: () => ipcRenderer.invoke('get-dashboard-stats'),
   getOrders: () => ipcRenderer.invoke('get-orders'),
   getToPackOrders: () => ipcRenderer.invoke('get-to-pack-orders'),
@@ -28,14 +32,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
   getUpcomingOrders: () => ipcRenderer.invoke('get-upcoming-orders'),
   getPendingDispatch: () => ipcRenderer.invoke('get-pending-dispatch'),
   getOrdersPage: (status, pageNum, pageSize) => ipcRenderer.invoke('get-orders-page', { status, pageNum, pageSize }),
-
-  // Export
   exportOrders: () => ipcRenderer.invoke('export-orders'),
-
-  // Registry
   checkRegistry: () => ipcRenderer.invoke('check-registry'),
 
-  // Active Flipkart APIs
+  // Flipkart Actions
   acceptOrder: (shipmentIds) => ipcRenderer.invoke('accept-order', { shipmentIds }),
   printLabels: (shipmentIds, reprint) => ipcRenderer.invoke('print-labels', { shipmentIds, reprint }),
   rtdOrders: (shipmentIds) => ipcRenderer.invoke('rtd-orders', { shipmentIds }),
@@ -43,8 +43,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
   selectDownloadFolder: () => ipcRenderer.invoke('select-download-folder'),
   getOTC: () => ipcRenderer.invoke('get-otc'),
 
-  // Auto Updater
+  // Updater
   checkForUpdates: () => ipcRenderer.invoke('check-for-updates'),
   installUpdate: () => ipcRenderer.invoke('install-update'),
-  onUpdaterEvent: (callback) => ipcRenderer.on('updater-event', (e, payload) => callback(payload))
+  onUpdaterEvent: (cb) => ipcRenderer.on('updater-event', (e, p) => cb(p))
 });

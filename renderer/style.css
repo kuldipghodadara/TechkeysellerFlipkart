@@ -723,3 +723,33 @@ body {
   opacity: 0.6;
   cursor: not-allowed;
 }
+
+/* === Auth Tabs === */
+.auth-tabs { display:flex; border-bottom:2px solid var(--border); margin-bottom:16px; }
+.auth-tab { flex:1; padding:10px; background:none; border:none; font-size:14px; font-weight:500; color:var(--text-secondary); cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-2px; transition:all 0.15s; }
+.auth-tab.active { color:var(--primary); border-bottom-color:var(--primary); }
+.auth-tab:hover { color:var(--text); }
+.auth-form-panel { margin-top:4px; }
+
+/* === Show/Hide Password Button === */
+.btn-eye { position:absolute; right:12px; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; color:#64748b; padding:0; display:flex; align-items:center; justify-content:center; }
+
+/* === Profile rows === */
+.profile-row { display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--border); font-size:14px; }
+.profile-row:last-child { border-bottom:none; }
+.profile-label { color:var(--text-secondary); font-weight:500; }
+
+/* === Plan warning card === */
+.plan-warning-card { background:rgba(239,68,68,0.06); border:1px solid rgba(239,68,68,0.15); border-radius:var(--radius); padding:16px; }
+
+/* === Plan expired overlay === */
+.plan-overlay { position:absolute; inset:0; z-index:100; background:rgba(255,255,255,0.92); display:flex; align-items:center; justify-content:center; backdrop-filter:blur(2px); }
+.plan-overlay-card { text-align:center; max-width:360px; padding:32px;
+}
+
+.credit-bar { display:inline-block; padding:2px 10px; border-radius:12px; font-size:11px; font-weight:700; letter-spacing:0.3px; }
+.credit-bar.green { background:rgba(16,185,129,0.1); color:var(--success); }
+.credit-bar.orange { background:rgba(245,158,11,0.1); color:var(--warning); }
+.credit-bar.red { background:rgba(239,68,68,0.1); color:var(--danger); }
+
+.plan-info-card { background:var(--bg); border:1px solid var(--border); border-radius:var(--radius); padding:16px 20px; }
